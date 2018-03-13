@@ -51,7 +51,7 @@ class rLSE(object):
         """ to print out result of LSE as formula:
             y = Wn * x^n + W(n-1) * x^(n-1) + ... + W1 * x^1 + W0
         """
-        formula = "y = "
+        formula = "LSE Result : y = "
         for base in range(self._num_bases-1, -1, -1):
             if base == 0:
                 formula += "{}".format(self._weights[base, 0])
@@ -59,10 +59,21 @@ class rLSE(object):
                 formula += "{} * x^{} + ".format(self._weights[base, 0], base)
         print(formula)
 
+    def show_error(self):
+        """ to print out error of LSE
+        """
+        error = self._input * self._weights - self._label
+        sum_ = 0.0
+        for i in range(self._input.shape[0]):
+            sum_ += error[i, 0]**2
+        print('LSE Error : {}'.format(sum_/self._input.shape[0]))
+
 
 def main():
-    rlse = rLSE('data.txt', num_bases=2, lambda_=1.0)
+    rlse = rLSE('data.txt', num_bases=2, lambda_=0.3)
     rlse.show_formula()
+    rlse.show_error()
+
 
 if __name__ == '__main__':
     main()
