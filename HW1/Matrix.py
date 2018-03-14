@@ -137,6 +137,32 @@ class Mat():
             for _c in range(self._cols):
                 result[_r, _c] += matrix[_r, _c]
         return result
+
+    def __sub__(self, matrix):
+        """ override the function of addition
+
+        Args
+        ----
+        matrix : Mat(Customized)
+        """
+        # if scalar
+        if isinstance(matrix, float) or isinstance(matrix, int):
+            result = Mat(self._mat)
+            for _r in range(self._rows):
+                for _c in range(self._cols):
+                    result[_r, _c] -= float(matrix)
+            return result
+
+        # type check
+        if not isinstance(matrix, Mat):
+            raise ValueError('only accept dtype: Mat(Customized)')
+        result = Mat(self._mat)
+        # shape check
+        assert result.shape == matrix.shape
+        for _r in range(self._rows):
+            for _c in range(self._cols):
+                result[_r, _c] -= matrix[_r, _c]
+        return result
             
 
     def __mul__(self, matrix):
