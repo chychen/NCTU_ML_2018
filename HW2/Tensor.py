@@ -23,6 +23,15 @@ class Tensor():
             self._r0, self._r1, self._r2 = tensor.shape[0], tensor.shape[1], tensor.shape[2]
         self._pad = pad
 
+    @classmethod
+    def zeros(cls, shape):
+        """ init zeros tensor with shape
+        """
+        assert len(shape) == 3, "shape must have 3 ranks"
+        r0, r1, r2 = shape
+        temp = [Mat([[0 for i in range(r2)] for j in range(r1)]) for k in range(r0)]
+        return Tensor(temp)
+
     def __getitem__(self, tuple_index):
         if isinstance(tuple_index, int):
             return self._tensor[tuple_index]
@@ -142,6 +151,8 @@ def main():
     ten = Tensor(tensor)
     print(ten)
     print(ten.shape)
+    print(Tensor.zeros([2,3,4]))
+    print(Tensor.zeros([2,3,4]).shape)
 
 
 if __name__ == '__main__':
