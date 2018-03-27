@@ -5,19 +5,21 @@ from __future__ import division
 import os
 import struct
 import array
-import numpy as np
+
+from Matrix import Mat
+from Tensor import Tensor
 
 
 def load_mnist(dataset, path="."):
     """ load mnist and transform bytes into numpy array
-    
+
     Args
     ----
     dataset : str,
         'training' or 'testing' or raise ValueError
     path : str, default='.'
         path to dataset
-        
+
     Returns
     -------
     images : uint8, shape=(?, 28, 28)
@@ -47,22 +49,24 @@ def load_mnist(dataset, path="."):
         magic_nr, size = struct.unpack(">II", flbl.read(8))
         lbl = array.array("B", flbl.read())
 
-    images = np.zeros((size, rows, cols), dtype=np.uint8)
-    labels = np.zeros((size), dtype=np.uint8)
-    for i in range(size):  # int(len(ind) * size/100.)):
-        images[i] = np.array(
-            img[i*rows*cols:(i+1)*rows*cols]).reshape([rows, cols])
-        labels[i] = lbl[i]
-
-    print(images.shape)
-    print(labels.shape)
-
+    matrix_list = []
+    labels = []
+    for i in range(size):
+        matrix_temp = []
+        image_temp = img[i*rows*cols:(i+1)*rows*cols]
+        for j in range(rows):
+            matrix_temp.append(image_temp[j*rows:j*rows+cols])
+        labels.append(lbl[i])
+        matrix_list.append(Mat(matrix_temp))
+    images = Tensor(matrix_list)
     return images, labels
 
 
 def main():
-    load_mnist(dataset='training')
-    load_mnist(dataset='testing')
+    # train_images, train_labels = load_mnist(dataset='training')
+    test_images, test_labels = load_mnist(dataset='testing')
+    print(test_images[0])
+    print(test_labels[0])
 
 
 if __name__ == '__main__':

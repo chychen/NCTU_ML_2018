@@ -10,7 +10,7 @@ class Mat():
     dtype = Mat(Customized)
     """
 
-    def __init__(self, matrix, pad=20):
+    def __init__(self, matrix, pad=5):
         if isinstance(matrix, list):
             self._rows = len(matrix)
             self._cols = len(matrix[0])
@@ -21,92 +21,12 @@ class Mat():
             self._mat = copy.deepcopy(matrix._mat)
         self._pad = pad
 
-    def LU_decompose(self):
-        assert self._rows == self._cols, "only square matrix could be invrsed"
-        # init
-        mat = []
-        for _ in range(self._rows):
-            temp = []
-            for _ in range(self._cols):
-                temp.append(0.0)
-            mat.append(temp)
-        L_mat = Mat(mat)
-        U_mat = Mat(mat)
-        for i in range(self._rows):
-            L_mat[i, i] = 1.0  # Identity
-        # decompose
-        for i in range(self._rows):
-            for j in range(self._cols):
-                if j >= i:
-                    # Upper Matrix
-                    temp = self._mat[i][j]
-                    for k in range(0, i):
-                        temp -= L_mat[i, k] * U_mat[k, j]
-                    U_mat[i, j] = temp
-                else:
-                    # Lower Matrix
-                    temp = self._mat[i][j]
-                    for k in range(0, j):
-                        temp -= L_mat[i, k] * U_mat[k, j]
-                    L_mat[i, j] = temp / U_mat[j, j]
-        return L_mat, U_mat
-
-    def inv(self):
-        """ inverse matrix by LU decomposition 
-        A = L * U
-        U^-1 * L^-1 = A^-1
-        """
-        # decompose matrix
-        L_mat, U_mat = self.LU_decompose()
-        # inverse L
-        L_mat_inv = Mat(L_mat)
-        for i in range(self._rows):
-            for j in range(self._cols):
-                if i > j:
-                    temp = 0.0
-                    for k in range(i):
-                        temp -= L_mat_inv[i, k] * L_mat_inv[k, j]
-                    L_mat_inv[i, j] = temp
-        # inverse U
-        I_mat = []
-        for i in range(self._rows):
-            temp = []
-            for j in range(self._cols):
-                v = 1.0 if i == j else 0.0
-                temp.append(v)
-            I_mat.append(temp)
-
-        U_mat_inv = Mat(I_mat)
-        for _r in range(self._rows):
-            # make sure pivot == 0
-            pivot = U_mat[_r, _r]
-            for _c in range(_r, self._cols):
-                U_mat_inv[_r, _c] /= pivot
-                U_mat[_r, _c] /= pivot
-        for _r in range(self._rows):
-            for _c in range(self._cols):
-                if _c > _r and U_mat[_r, _c] != 0.0:
-                    factor = U_mat[_r, _c]
-                    U_mat_inv[_r, _c] -= factor * U_mat_inv[_c, _c]
-                    for j in range(_c, self._cols):
-                        U_mat[_r, j] -= factor * U_mat[_c, j]
-
-        return U_mat_inv*L_mat_inv
-
-    def t(self):
-        """ return transpose matrix
-        """
-        t_mat = []
-        for _r in range(self._cols):
-            temp = []
-            for _c in range(self._rows):
-                temp.append(self._mat[_c][_r])
-            t_mat.append(temp)
-        return Mat(t_mat)
-
     def __getitem__(self, tuple_index):
-        row, col = tuple_index
-        return self._mat[row][col]
+        if isinstance(tuple_index, int):
+            return self._mat[tuple_index]
+        elif len(tuple_index) == 2:
+            row, col = tuple_index
+            return self._mat[row][col]
 
     def __setitem__(self, tuple_index, value):
         row, col = tuple_index
@@ -163,7 +83,6 @@ class Mat():
             for _c in range(self._cols):
                 result[_r, _c] -= rhs[_r, _c]
         return result
-            
 
     def __mul__(self, rhs):
         """ override the function of multiplication
@@ -179,38 +98,17 @@ class Mat():
                 for _c in range(self._cols):
                     result[_r, _c] *= float(rhs)
             return result
-
-        # type check
-        if not isinstance(rhs, Mat):
-            raise ValueError('only accept dtype: Mat(Customized)')
-        # shape check
-        assert self._cols == rhs.shape[0]
-        # init
-        result = []
-        for _ in range(self._rows):
-            temp = []
-            for _ in range(rhs.shape[1]):
-                temp.append(0.0)
-            result.append(temp)
-        # mul
-        for _r in range(self._rows):
-            for _c in range(rhs.shape[1]):
-                for left_v, right_v in zip(self._mat[_r], rhs.t()[_c, :]):
-                    result[_r][_c] += (left_v * right_v)
-        return Mat(result)
+        else:
+            raise ValueError('only accept dtype: scalar')
 
     def __repr__(self):
-        pad = self._pad
-        repr_ = "".rjust(pad)
-        for i in range(self._cols):
-            repr_ += "<c{}>".format(i).rjust(pad)
-        repr_ += "\n"
-
-        for i in range(self._rows):
-            temp = "<r{}>".format(i).rjust(pad)
-            for j in range(self._cols):
-                temp += (str(self._mat[i][j])).rjust(pad)
-            repr_ += temp + "\n"
+        repr_ = "[\n"
+        for _r0 in range(self._rows):
+            temp_1 = "["
+            for _r1 in range(self._cols):
+                temp_1 += (str(self._mat[_r0][_r1]) + ", ").rjust(self._pad)
+            repr_ += temp_1 + "], \n"
+        repr_ += "]\n"
         return repr_
 
     @property
@@ -225,6 +123,6 @@ class Mat():
         """
         return 'Mat(Customized)'
 
-    # override 
+    # override
     __rmul__ = __mul__
     __radd__ = __add__
