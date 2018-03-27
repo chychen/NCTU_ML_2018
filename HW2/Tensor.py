@@ -29,7 +29,8 @@ class Tensor():
         """
         assert len(shape) == 3, "shape must have 3 ranks"
         r0, r1, r2 = shape
-        temp = [Mat([[0 for i in range(r2)] for j in range(r1)]) for k in range(r0)]
+        temp = [Mat([[0 for _ in range(r2)] for _ in range(r1)])
+                for _ in range(r0)]
         return Tensor(temp)
 
     def __getitem__(self, tuple_index):
@@ -51,13 +52,15 @@ class Tensor():
 
         Args
         ----
-        rhs : Mat(Customized)
+        rhs : scalar or Tensor
         """
         # if scalar
         if isinstance(rhs, float) or isinstance(rhs, int):
             result = Tensor(self._tensor)
             for _r0 in range(self._r0):
-                result[_r0] += float(rhs)
+                for _r1 in range(self._r1):
+                    for _r2 in range(self._r2):
+                        result[_r0, _r1, _r2] += float(rhs)
             return result
 
         # type check
@@ -67,7 +70,9 @@ class Tensor():
         # shape check
         assert result.shape == rhs.shape
         for _r0 in range(self._r0):
-            result[_r0] += rhs[_r0]
+            for _r1 in range(self._r1):
+                for _r2 in range(self._r2):
+                    result[_r0, _r1, _r2] += rhs[_r0, _r1, _r2]
         return result
 
     def __sub__(self, rhs):
@@ -75,7 +80,7 @@ class Tensor():
 
         Args
         ----
-        rhs : Mat(Customized)
+        rhs : scalar or Tensor
         """
         # if scalar
         if isinstance(rhs, float) or isinstance(rhs, int):
@@ -94,18 +99,38 @@ class Tensor():
             result[_r0] -= rhs[_r0]
         return result
 
-    def __mul__(self, rhs):
-        """ override the function of multiplication
+    def __truediv__(self, rhs):
+        """ override the function of true div
 
         Args
         ----
-        rhs : Mat(Customized)
+        rhs : scalar or Tensor
         """
         # if scalar
         if isinstance(rhs, float) or isinstance(rhs, int):
             result = Tensor(self._tensor)
             for _r0 in range(self._r0):
-                result[_r0] *= float(rhs)
+                for _r1 in range(self._r1):
+                    for _r2 in range(self._r2):
+                        result[_r0, _r1, _r2] /= float(rhs)
+            return result
+        else:
+            raise ValueError('only accept dtype: scalar')
+
+    def __mul__(self, rhs):
+        """ override the function of multiplication
+
+        Args
+        ----
+        rhs : scalar or Tensor
+        """
+        # if scalar
+        if isinstance(rhs, float) or isinstance(rhs, int):
+            result = Tensor(self._tensor)
+            for _r0 in range(self._r0):
+                for _r1 in range(self._r1):
+                    for _r2 in range(self._r2):
+                        result[_r0, _r1, _r2] *= float(rhs)
             return result
         else:
             raise ValueError('only accept dtype: scalar')
@@ -151,8 +176,9 @@ def main():
     ten = Tensor(tensor)
     print(ten)
     print(ten.shape)
-    print(Tensor.zeros([2,3,4]))
-    print(Tensor.zeros([2,3,4]).shape)
+    print(Tensor.zeros([2, 3, 4]))
+    print(Tensor.zeros([2, 3, 4]).shape)
+    print((Tensor.zeros([2, 3, 4]) + 1) / 3)
 
 
 if __name__ == '__main__':
