@@ -3,7 +3,6 @@ from __future__ import division
 from __future__ import print_function
 
 import copy
-from Matrix import Mat
 
 
 class Tensor():
@@ -14,10 +13,8 @@ class Tensor():
     def __init__(self, tensor, pad=5):
         if isinstance(tensor, list):
             self._tensor = copy.deepcopy(tensor)
-            assert isinstance(
-                tensor[0], Mat), "items in tensor must be type Mat(Customized)"
             self._r0, self._r1, self._r2 = len(
-                tensor), tensor[0].shape[0], tensor[0].shape[1]
+                tensor), len(tensor[0]), len(tensor[0][0])
         elif isinstance(tensor, Tensor):
             self._tensor = copy.deepcopy(tensor._tensor)
             self._r0, self._r1, self._r2 = tensor.shape[0], tensor.shape[1], tensor.shape[2]
@@ -29,8 +26,7 @@ class Tensor():
         """
         assert len(shape) == 3, "shape must have 3 ranks"
         r0, r1, r2 = shape
-        temp = [Mat([[0 for _ in range(r2)] for _ in range(r1)])
-                for _ in range(r0)]
+        temp = [[[0 for _ in range(r2)] for _ in range(r1)] for _ in range(r0)]
         return Tensor(temp)
 
     def __getitem__(self, tuple_index):
@@ -41,11 +37,11 @@ class Tensor():
             return self._tensor[r][c]
         elif len(tuple_index) == 3:
             r0, r1, r2 = tuple_index
-            return self._tensor[r0][r1, r2]
+            return self._tensor[r0][r1][r2]
 
     def __setitem__(self, tuple_index, value):
         r0, r1, r2 = tuple_index
-        self._tensor[r0][r1, r2] = value
+        self._tensor[r0][r1][r2] = value
 
     def __add__(self, rhs):
         """ override the function of addition
@@ -86,7 +82,9 @@ class Tensor():
         if isinstance(rhs, float) or isinstance(rhs, int):
             result = Tensor(self._tensor)
             for _r0 in range(self._r0):
-                result[_r0] -= float(rhs)
+                for _r1 in range(self._r1):
+                    for _r2 in range(self._r2):
+                        result[_r0, _r1, _r2] -= float(rhs)
             return result
 
         # type check
@@ -96,7 +94,9 @@ class Tensor():
         # shape check
         assert result.shape == rhs.shape
         for _r0 in range(self._r0):
-            result[_r0] -= rhs[_r0]
+            for _r1 in range(self._r1):
+                for _r2 in range(self._r2):
+                    result[_r0, _r1, _r2] -= rhs[_r0, _r1, _r2]
         return result
 
     def __truediv__(self, rhs):
@@ -142,8 +142,8 @@ class Tensor():
             for _r1 in range(self._r1):
                 temp_2 = "[ "
                 for _r2 in range(self._r2):
-                    temp_2 += (str(self._tensor[_r0]
-                                   [_r1, _r2]) + ", ").rjust(self._pad)
+                    temp_2 += (str(self._tensor[_r0][_r1]
+                                   [_r2]) + ", ").rjust(self._pad)
                 temp_1 += temp_2 + "], \n"
             repr_ += temp_1 + "], \n"
         repr_ += "]\n"
@@ -167,12 +167,7 @@ class Tensor():
 
 
 def main():
-    input_ = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-    temp = Mat(input_)
-    tensor = []
-    tensor.append(temp)
-    tensor.append(temp*10)
-    tensor.append(temp*111.222)
+    tensor = [[[i*j*k for i in range(3)] for j in range(3)] for k in range(4)]
     ten = Tensor(tensor)
     print(ten)
     print(ten.shape)
