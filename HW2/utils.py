@@ -22,7 +22,7 @@ def load_mnist(dataset, path="."):
 
     Returns
     -------
-    images : uint8, shape=(?, 28, 28)
+    images : Tensor(Customized), shape=(?, 28, 28)
     labels : uint8, shape=(?,)
 
     # ref: https://docs.python.org/3/library/struct.html#format-characters
@@ -63,9 +63,10 @@ def load_mnist(dataset, path="."):
 
 
 def main():
-    # train_images, train_labels = load_mnist(dataset='training')
+    train_images, train_labels = load_mnist(dataset='training')
     test_images, test_labels = load_mnist(dataset='testing')
     print(test_images[0])
+    print(test_images[0].shape)
     print(test_labels[0])
 
 
