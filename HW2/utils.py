@@ -6,7 +6,6 @@ import os
 import struct
 import array
 
-from Matrix import Mat
 from Tensor import Tensor
 
 
@@ -49,16 +48,16 @@ def load_mnist(dataset, path="."):
         magic_nr, size = struct.unpack(">II", flbl.read(8))
         lbl = array.array("B", flbl.read())
 
-    matrix_list = []
+    image_list = []
     labels = []
     for i in range(size):
-        matrix_temp = []
-        image_temp = img[i*rows*cols:(i+1)*rows*cols]
+        image_temp = []
+        temp = img[i*rows*cols:(i+1)*rows*cols]
         for j in range(rows):
-            matrix_temp.append(image_temp[j*rows:j*rows+cols])
+            image_temp.append(temp[j*rows:j*rows+cols])
         labels.append(lbl[i])
-        matrix_list.append(Mat(matrix_temp))
-    images = Tensor(matrix_list)
+        image_list.append(image_temp)
+    images = Tensor(image_list)
     return images, labels
 
 
@@ -66,7 +65,6 @@ def main():
     train_images, train_labels = load_mnist(dataset='training')
     test_images, test_labels = load_mnist(dataset='testing')
     print(test_images[0])
-    print(test_images[0].shape)
     print(test_labels[0])
 
 

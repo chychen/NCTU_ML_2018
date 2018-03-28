@@ -31,10 +31,10 @@ class Tensor():
 
     def __getitem__(self, tuple_index):
         if isinstance(tuple_index, int):
-            return self._tensor[tuple_index]
+            return self._tensor[tuple_index][:][:]
         elif len(tuple_index) == 2:
             r, c = tuple_index
-            return self._tensor[r][c]
+            return self._tensor[r][c][:]
         elif len(tuple_index) == 3:
             r0, r1, r2 = tuple_index
             return self._tensor[r0][r1][r2]
