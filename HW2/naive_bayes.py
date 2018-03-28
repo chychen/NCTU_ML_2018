@@ -148,13 +148,11 @@ def continuous_naive_bayes(train_data, train_labels, test_data, test_labels):
                     # result_log_posteriors[idx][label] += math.log(
                     #     gaussian_p+1e-8)
                     result_log_posteriors[idx][label] -= (pixel_value-mean_table[label][row, col, 0])**2/(
-                        2*variance_table[label][row, col, 0])*(1.0/math.sqrt(2*math.pi*variance_table[label][row, col, 0]))
+                        2*variance_table[label][row, col, 0])*1.0/(math.sqrt(2*math.pi*variance_table[label][row, col, 0]))
             # mul with prior (1.0/labels_table[label])
             # log prob
             result_log_posteriors[idx][label] += math.log(
                 1.0/labels_table[label])
-            if result_log_posteriors[idx][label] > 0:
-                input(result_log_posteriors[idx][label])
     # 2. find the max one as prediction result, and statistic the error rate according to labels
     show_error_rate(result_log_posteriors, test_data, test_labels)
 

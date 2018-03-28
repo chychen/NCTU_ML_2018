@@ -16,15 +16,16 @@ from __future__ import division
 
 import argparse
 
+
 def online_learning(all_data, prior_a, prior_b):
     """ Use Beta-Binomial conjugation to perform online learning.
     Print out the Binomial likelihood (based on MLE, of course), Beta prior and posterior probability (parameters only) for each line. 
     """
-    prior = prior_a/(prior_a+prior_b)
     all_successes = 0
     all_failures = 0
     all_n = 0
     for i, data in enumerate(all_data):
+        prior = prior_a/(prior_a+prior_b)
         n = len(data)
         successes = 0
         for v in data:
@@ -36,10 +37,13 @@ def online_learning(all_data, prior_a, prior_b):
         all_n += n
         p = all_successes/all_n
         mle = p**all_successes*(1-p)**all_failures
-        posterior = (all_successes+1)/(all_successes+1+all_failures+1)
+        a = prior_a + successes
+        b = prior_b + failures
+        posterior = a/(a+b)
         print('DATA INDEX: {}\n\tPROB: {}\n\tMLE: {}\n\tPRIOR: {}\n\tPOSTERIOR: {}\n'.format(
             i, p, mle, prior, posterior))
-        prior = posterior
+        prior_a = a
+        prior_b = b
 
 
 def main():
