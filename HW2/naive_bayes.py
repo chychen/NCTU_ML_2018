@@ -82,9 +82,11 @@ def discrete_naive_bayes(train_data, train_labels, test_data, test_labels):
             for row in range(test_data.shape[1]):
                 for col in range(test_data.shape[2]):
                     bin_idx = test_data[idx, row, col]//32
-                    result_log_posteriors[idx][label] += math.log(bins_table[label][row, col, bin_idx])
+                    result_log_posteriors[idx][label] += math.log(
+                        bins_table[label][row, col, bin_idx])
             # mul with prior (1.0/labels_table[label])
-            result_log_posteriors[idx][label] += math.log(1.0/labels_table[label])
+            result_log_posteriors[idx][label] += math.log(
+                1.0/labels_table[label])
             # print(result_log_posteriors[idx][label])
     # 2. find the max one as prediction result, statistic the error rate according to labels
     show_error_rate(result_log_posteriors, test_data, test_labels)
@@ -140,21 +142,27 @@ def continuous_naive_bayes(train_data, train_labels, test_data, test_labels):
             for row in range(test_data.shape[1]):
                 for col in range(test_data.shape[2]):
                     pixel_value = test_data[idx, row, col]
-                    gaussian_p = 1.0/math.sqrt(2*math.pi*variance_table[label][row, col, 0])*math.exp(-(
-                        pixel_value-mean_table[label][row, col, 0])**2/(2*variance_table[label][row, col, 0]))
-                    # log prob # avoid log(zero)
-                    result_log_posteriors[idx][label] += math.log(
-                        gaussian_p+1e-8) 
+                    # gaussian_p = 1.0/math.sqrt(2*math.pi*variance_table[label][row, col, 0])*math.exp(-(
+                    #     pixel_value-mean_table[label][row, col, 0])**2/(2*variance_table[label][row, col, 0]))
+                    # # log prob # avoid log(zero)
+                    # result_log_posteriors[idx][label] += math.log(
+                    #     gaussian_p+1e-8)
+                    result_log_posteriors[idx][label] -= (pixel_value-mean_table[label][row, col, 0])**2/(
+                        2*variance_table[label][row, col, 0])*(1.0/math.sqrt(2*math.pi*variance_table[label][row, col, 0]))
             # mul with prior (1.0/labels_table[label])
-            result_log_posteriors[idx][label] += math.log(1.0/labels_table[label]) # log prob
-            # print(result_log_posteriors[idx][label])
+            # log prob
+            result_log_posteriors[idx][label] += math.log(
+                1.0/labels_table[label])
+            if result_log_posteriors[idx][label] > 0:
+                input(result_log_posteriors[idx][label])
     # 2. find the max one as prediction result, and statistic the error rate according to labels
     show_error_rate(result_log_posteriors, test_data, test_labels)
 
 
 def main():
     print('Start data I/O...')
-    train_images, train_labels = load_mnist(dataset='training', fetch_size=60000)
+    train_images, train_labels = load_mnist(
+        dataset='training', fetch_size=60000)
     test_images, test_labels = load_mnist(dataset='testing', fetch_size=10000)
 
     print('Start analysis...')
