@@ -17,20 +17,20 @@ from utils import load_mnist
 from Tensor import Tensor
 
 
-def show_error_rate(result_posteriors, test_data, test_labels):
+def show_error_rate(result_log_posteriors, test_data, test_labels):
     """ find the max one as prediction result, statistic the error rate according to labels
 
     Args
     ----
-    result_posteriors : list of list, shape=[num_data, 10]
+    result_log_posteriors : list of list, shape=[num_data, 10]
     """
     error_counter = 0
     predictions = [-1 for _ in range(test_data.shape[0])]
     for idx in range(test_data.shape[0]):
         max_temp = -math.inf
         for label in range(10):
-            if result_posteriors[idx][label] > max_temp:
-                max_temp = result_posteriors[idx][label]
+            if result_log_posteriors[idx][label] > max_temp:
+                max_temp = result_log_posteriors[idx][label]
                 predictions[idx] = label
         if predictions[idx] != test_labels[idx]:
             error_counter += 1
@@ -73,8 +73,8 @@ def discrete_naive_bayes(train_data, train_labels, test_data, test_labels):
     # testing part
     print('Inference the posteriros on Testing Data...')
     # 1. inference the posterior for all category, and print out
-    result_posteriors = [
-        [1.0 for _ in range(10)] for _ in range(test_data.shape[0])]
+    result_log_posteriors = [
+        [0.0 for _ in range(10)] for _ in range(test_data.shape[0])]
     for idx in range(test_data.shape[0]):
         if idx % 1000 == 0:
             print('Progress... {}/{}'.format(idx, test_data.shape[0]))
@@ -82,12 +82,12 @@ def discrete_naive_bayes(train_data, train_labels, test_data, test_labels):
             for row in range(test_data.shape[1]):
                 for col in range(test_data.shape[2]):
                     bin_idx = test_data[idx, row, col]//32
-                    result_posteriors[idx][label] *= bins_table[label][row, col, bin_idx]
+                    result_log_posteriors[idx][label] += math.log(bins_table[label][row, col, bin_idx])
             # mul with prior (1.0/labels_table[label])
-            result_posteriors[idx][label] *= (1.0/labels_table[label])
-            # print(result_posteriors[idx][label])
+            result_log_posteriors[idx][label] += math.log(1.0/labels_table[label])
+            # print(result_log_posteriors[idx][label])
     # 2. find the max one as prediction result, statistic the error rate according to labels
-    show_error_rate(result_posteriors, test_data, test_labels)
+    show_error_rate(result_log_posteriors, test_data, test_labels)
 
 
 def continuous_naive_bayes(train_data, train_labels, test_data, test_labels):
@@ -131,8 +131,8 @@ def continuous_naive_bayes(train_data, train_labels, test_data, test_labels):
     # testing part
     print('Inference the posteriros on Testing Data...')
     # 1. inference the posterior for all category, and print out
-    result_posteriors = [
-        [1.0 for _ in range(10)] for _ in range(test_data.shape[0])]
+    result_log_posteriors = [
+        [0.0 for _ in range(10)] for _ in range(test_data.shape[0])]
     for idx in range(test_data.shape[0]):
         if idx % 1000 == 0:
             print('Progress... {}/{}'.format(idx, test_data.shape[0]))
@@ -142,12 +142,14 @@ def continuous_naive_bayes(train_data, train_labels, test_data, test_labels):
                     pixel_value = test_data[idx, row, col]
                     gaussian_p = 1.0/math.sqrt(2*math.pi*variance_table[label][row, col, 0])*math.exp(-(
                         pixel_value-mean_table[label][row, col, 0])**2/(2*variance_table[label][row, col, 0]))
-                    result_posteriors[idx][label] *= gaussian_p
+                    # log prob # avoid log(zero)
+                    result_log_posteriors[idx][label] += math.log(
+                        gaussian_p+1e-8) 
             # mul with prior (1.0/labels_table[label])
-            result_posteriors[idx][label] *= (1.0/labels_table[label])
-            # print(result_posteriors[idx][label])
+            result_log_posteriors[idx][label] += math.log(1.0/labels_table[label]) # log prob
+            # print(result_log_posteriors[idx][label])
     # 2. find the max one as prediction result, and statistic the error rate according to labels
-    show_error_rate(result_posteriors, test_data, test_labels)
+    show_error_rate(result_log_posteriors, test_data, test_labels)
 
 
 def main():
