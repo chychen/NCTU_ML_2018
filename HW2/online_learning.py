@@ -14,6 +14,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
+import argparse
 
 def online_learning(all_data, prior_a, prior_b):
     """ Use Beta-Binomial conjugation to perform online learning.
@@ -53,8 +54,14 @@ def main():
                     temp.append(int(c))
             all_data.append(temp)
 
-    online_learning(all_data, prior_a=1.0, prior_b=1.0)
+    online_learning(all_data, prior_a=ARGS.prior_a, prior_b=ARGS.prior_b)
 
 
 if __name__ == '__main__':
+    PARSER = argparse.ArgumentParser()
+    PARSER.add_argument("prior_a", type=float,
+                        help="parameter a in beta prior distribution")
+    PARSER.add_argument("prior_b", type=float,
+                        help="parameter b in beta prior distribution")
+    ARGS = PARSER.parse_args()
     main()
