@@ -119,7 +119,7 @@ def continuous_naive_bayes(train_data, train_labels, test_data, test_labels):
         # mean, shape=[10][28, 28, 1]
         mean_table[label] = sum_table[label] / labels_table[label]
     # variance, shape=[10][28, 28, 1]
-    variance_table = [Tensor.zeros(shape=[28, 28, 1])+1e-4 for _ in range(10)]
+    variance_table = [Tensor.zeros(shape=[28, 28, 1]) for _ in range(10)]
     for idx in range(train_data.shape[0]):
         if idx % 1000 == 0:
             print('Progress... {}/{}'.format(idx, train_data.shape[0]))
@@ -129,7 +129,7 @@ def continuous_naive_bayes(train_data, train_labels, test_data, test_labels):
                 variance_table[label][row, col,
                                       0] += (train_data[idx, row, col] - mean_table[label][row, col, 0])**2
     for label in range(10):
-        variance_table[label] = (variance_table[label] / labels_table[label])
+        variance_table[label] = (variance_table[label] / labels_table[label]) + 1e2
     # testing part
     print('Inference the posteriros on Testing Data...')
     # 1. inference the posterior for all category, and print out
