@@ -9,7 +9,7 @@ import array
 from Tensor import Tensor
 
 
-def load_mnist(dataset, path="."):
+def load_mnist(dataset, fetch_size, path="."):
     """ load mnist and transform bytes into numpy array
 
     Args
@@ -42,15 +42,17 @@ def load_mnist(dataset, path="."):
 
     with open(fname_img, 'rb') as fimg:
         magic_nr, size, rows, cols = struct.unpack(">IIII", fimg.read(16))
+        assert fetch_size <= size
         img = array.array("B", fimg.read())
 
     with open(fname_lbl, 'rb') as flbl:
         magic_nr, size = struct.unpack(">II", flbl.read(8))
+        assert fetch_size <= size
         lbl = array.array("B", flbl.read())
 
     image_list = []
     labels = []
-    for i in range(size):
+    for i in range(fetch_size):
         image_temp = []
         temp = img[i*rows*cols:(i+1)*rows*cols]
         for j in range(rows):
@@ -62,8 +64,8 @@ def load_mnist(dataset, path="."):
 
 
 def main():
-    train_images, train_labels = load_mnist(dataset='training')
-    test_images, test_labels = load_mnist(dataset='testing')
+    train_images, train_labels = load_mnist(dataset='training', fetch_size=60000)
+    test_images, test_labels = load_mnist(dataset='testing', fetch_size=10000)
     print(test_images[0])
     print(test_labels[0])
 

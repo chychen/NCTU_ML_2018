@@ -154,8 +154,8 @@ def continuous_naive_bayes(train_data, train_labels, test_data, test_labels):
 
 def main():
     print('Start data I/O...')
-    train_images, train_labels = load_mnist(dataset='training')
-    test_images, test_labels = load_mnist(dataset='testing')
+    train_images, train_labels = load_mnist(dataset='training', fetch_size=60000)
+    test_images, test_labels = load_mnist(dataset='testing', fetch_size=10000)
 
     print('Start analysis...')
     if ARGS.mode == 'discrete':
