@@ -20,6 +20,9 @@ def online_learning(all_data, prior_a, prior_b):
     Print out the Binomial likelihood (based on MLE, of course), Beta prior and posterior probability (parameters only) for each line. 
     """
     prior = prior_a/(prior_a+prior_b)
+    all_successes = 0
+    all_failures = 0
+    all_n = 0
     for i, data in enumerate(all_data):
         n = len(data)
         successes = 0
@@ -27,11 +30,14 @@ def online_learning(all_data, prior_a, prior_b):
             if v == 1:
                 successes += 1
         failures = n - successes
-        p = successes/n
-        mle = n * p
-        posterior = (successes+1)/(successes+1+failures+1)
-        print('DATA INDEX: {}\n\tMLE: {}\n\tPRIOR: {}\n\tPOSTERIOR: {}\n'.format(
-            i, mle, prior, posterior))
+        all_successes += successes
+        all_failures += failures
+        all_n += n
+        p = all_successes/all_n
+        mle = p**all_successes*(1-p)**all_failures
+        posterior = (all_successes+1)/(all_successes+1+all_failures+1)
+        print('DATA INDEX: {}\n\tPROB: {}\n\tMLE: {}\n\tPRIOR: {}\n\tPOSTERIOR: {}\n'.format(
+            i, p, mle, prior, posterior))
         prior = posterior
 
 
