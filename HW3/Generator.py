@@ -46,7 +46,7 @@ class Generator(object):
         for v in range(number_basis):
             y += (weight[v] * X ** v)
         y += cls.univariate_gaussian(0, variance)
-        return y
+        return y, X
 
 
 if __name__ == '__main__':
