@@ -10,7 +10,7 @@ class Mat():
     dtype = Mat(Customized)
     """
 
-    def __init__(self, matrix, pad=20):
+    def __init__(self, matrix, pad=10):
         if isinstance(matrix, list):
             self._rows = len(matrix)
             self._cols = len(matrix[0])
@@ -208,7 +208,7 @@ class Mat():
         for i in range(self._rows):
             temp = "<r{}>".format(i).rjust(pad)
             for j in range(self._cols):
-                temp += (str(self._mat[i][j])).rjust(pad)
+                temp += ("{:.4f}".format(self._mat[i][j])).rjust(pad)
             repr_ += temp + "\n"
         return repr_
 

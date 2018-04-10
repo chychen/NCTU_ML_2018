@@ -68,12 +68,12 @@ def baysian_linear_regression(b, num_basis, error_variance):
         else:
             y.append([new_y])
             X.append([new_x**i for i in range(num_basis)])
-        # posterior
-        a = error_variance
-        posterior_cov_mat = a*X.t()*X + b*Mat.identity(num_basis)
         # change annotation
+        a = error_variance
         S = prior_cov_mat.inv()
         m = prior_mean_mat
+        # posterior
+        posterior_cov_mat = a*X.t()*X + S
         COV = posterior_cov_mat
         posterior_mean_mat = COV.inv()*(a*X.t()*y+S*m)
         # check converge
