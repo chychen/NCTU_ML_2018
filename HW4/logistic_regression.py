@@ -28,9 +28,10 @@ from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
 
+import math
 from Generator import Generator
 from Matrix import Mat
-import math
+from utils import ConfusionMatrix
 
 
 def mean_abs_diff(a, b):
@@ -39,7 +40,7 @@ def mean_abs_diff(a, b):
     return (a-b).mean()
 
 
-def steepest_gradient_descent(weights, inputs, labels, iterations=1e4, epsilon=1e-10, learning_rate=1e-6):
+def steepest_gradient_descent(weights, inputs, labels, iterations=1e6, epsilon=1e-4, learning_rate=1e-3):
     """ to classify data into two classes (Bernoulli Distribution)
     (gradient in matrix form)
     A : inputs, shape=(n,k=3)
@@ -49,21 +50,40 @@ def steepest_gradient_descent(weights, inputs, labels, iterations=1e4, epsilon=1
     gradients : yi-1/(1+e**(-xi*W), shape=(k,1)
     W(n+1) = W(n) + A.t()*gradients
     """
-    for iter_idx in range(int(iterations)):
+    for idx in range(int(iterations)):
+        print('iteration index: ', idx)
         old_weights = Mat(weights)
         gradients = []
         for i in range(labels.shape[0]):
             exp_term = (-1*inputs[i:i+1]*old_weights)[0, 0]
-            gradients.append([labels[i, 0]-1.0/math.e**exp_term])
+            gradients.append([labels[i, 0]-1.0/(1+math.e**exp_term)])
         gradients = learning_rate*inputs.t()*Mat(gradients)
         weights = old_weights + gradients
         print(weights)
         if mean_abs_diff(old_weights, weights) < epsilon:
             break
 
+    return weights
+
 
 def newton_method(weights, inputs, labels):
-    pass
+
+    return weights
+
+
+def inference(weights, inputs):
+    logits = []
+    for i in range(inputs.shape[0]):
+        exp_term = (-1*inputs[i:i+1]*weights)[0, 0]
+        output = 1.0/(1+math.e**exp_term)
+        print(output)
+        # decision boundary
+        if output > 0.5:
+            output = 1
+        else:
+            output = 0
+        logits.append([output])
+    return Mat(logits)
 
 
 def logistic_regression(n, mx1, vx1, my1, vy1, mx2, vx2, my2, vy2, optimizer='SGD'):
@@ -100,15 +120,23 @@ def logistic_regression(n, mx1, vx1, my1, vy1, mx2, vx2, my2, vy2, optimizer='SG
     print('weights shape:\t', weights.shape)
     # optimization
     if optimizer == 'SGD':
-        steepest_gradient_descent(weights, inputs, labels)
+        weights = steepest_gradient_descent(weights, inputs, labels)
     elif optimizer == 'NTM':
-        newton_method(weights, inputs, labels)
+        weights = newton_method(weights, inputs, labels)
     else:
         raise AttributeError('{} is not a valid optimizor'.format(optimizer))
+    # inference
+    logits = inference(weights, inputs)
+    # evaluate model
+    CM = ConfusionMatrix(logits, labels)
+    CM.show_matrix()
+    CM.show_accuracy()
+    CM.show_sensitivity()
+    CM.show_specificity()
 
 
 def main():
-    logistic_regression(10, 3, 1, 3, 1, 4, 1, 4, 1, optimizer='SGD')
+    logistic_regression(10, 3, 1, 3, 1, 10, 1, 4, 1, optimizer='SGD')
 
 
 if __name__ == '__main__':
