@@ -258,6 +258,16 @@ class Mat():
                 sum_ = sum_ + self._mat[i][j]
         return sum_/(self._rows*self._cols)
 
+    @classmethod
+    def zeros(cls, shape):
+        ret = []
+        for _ in range(shape[0]):
+            tmp = []
+            for _ in range(shape[1]):
+                tmp.append(0)
+            ret.append(tmp)
+        return Mat(ret)
+
     # override
     __rmul__ = __mul__
     __radd__ = __add__

@@ -34,6 +34,13 @@ from Matrix import Mat
 from utils import ConfusionMatrix
 
 
+def is_33_singullar(mat):
+    det = mat[0, 0]*mat[1, 1]*mat[2, 2]+mat[1, 0]*mat[2, 1]*mat[0, 2]+mat[0, 1]*mat[1, 2]*mat[2,
+                                                                                              0] - mat[0, 2]*mat[1, 1]*mat[2, 0]+mat[0, 1]*mat[1, 0]*mat[2, 2]+mat[0, 0]*mat[2, 1]*mat[1, 2]
+    print('Determinant: ', det)
+    return det==0
+
+
 def mean_abs_diff(a, b):
     """ calculate the mean of absolute difference between a and b
     """
@@ -41,14 +48,15 @@ def mean_abs_diff(a, b):
 
 
 def steepest_gradient_descent(weights, inputs, labels, iterations=1e6, epsilon=1e-4, learning_rate=1e-3):
-    """ to classify data into two classes (Bernoulli Distribution)
+    """ steepest gradient descent
+    to classify data into two classes (Bernoulli Distribution)
     (gradient in matrix form)
     A : inputs, shape=(n,k=3)
     yi : labels[i,0], shape=()
     xi : inputs[i:i+1], shape=(1,k=3)
     W : weights, shape=(k=3,1)
-    gradients : yi-1/(1+e**(-xi*W), shape=(k,1)
-    W(n+1) = W(n) + A.t()*gradients
+    gradients : A.t()*(yi-1/(1+e**(-xi*W)), shape=(k,1)
+    W(n+1) = W(n) + learning_rate*gradients
     """
     for idx in range(int(iterations)):
         print('iteration index: ', idx)
@@ -66,8 +74,40 @@ def steepest_gradient_descent(weights, inputs, labels, iterations=1e6, epsilon=1
     return weights
 
 
-def newton_method(weights, inputs, labels):
-
+def newton_method(weights, inputs, labels, iterations=1e6, epsilon=1e-5, learning_rate=1e-4):
+    """ newton's method
+    to classify data into two classes (Bernoulli Distribution)
+    (gradient in matrix form)
+    A : inputs, shape=(n,k=3)
+    yi : labels[i,0], shape=()
+    xi : inputs[i:i+1], shape=(1,k=3)
+    W : weights, shape=(k=3,1)
+    gradients : A.t()*(yi-1/(1+e**(-xi*W)), shape=(k,1)
+    D : diagonal matrix, shape=(n,n)
+        trace(i)=e**(-xi*W)/(1+e**(-xi*W))**2
+    hessian : A.t()*D*A
+    W(n+1) = W(n) + gradients
+    """
+    for idx in range(int(iterations)):
+        print('iteration index: ', idx)
+        old_weights = Mat(weights)
+        gradients = []
+        for i in range(labels.shape[0]):
+            exp_term = (-1*inputs[i:i+1]*old_weights)[0, 0]
+            gradients.append([labels[i, 0]-1.0/(1+math.e**exp_term)])
+        D = Mat.identity(dims=labels.shape[0])
+        for i in range(labels.shape[0]):
+            exp_term = (-1*inputs[i:i+1]*old_weights)[0, 0]
+            D[i, i] = math.e**exp_term/((1+math.e**exp_term)**2)
+        gradients = inputs.t()*Mat(gradients)
+        hessian = inputs.t()*D*inputs
+        if is_33_singullar(hessian):
+            print('Singular')
+            break
+        weights = old_weights - learning_rate*hessian.inv()*gradients
+        print(weights)
+        if mean_abs_diff(old_weights, weights) < epsilon:
+            break
     return weights
 
 
@@ -136,7 +176,8 @@ def logistic_regression(n, mx1, vx1, my1, vy1, mx2, vx2, my2, vy2, optimizer='SG
 
 
 def main():
-    logistic_regression(10, 3, 1, 3, 1, 10, 1, 4, 1, optimizer='SGD')
+    # logistic_regression(10, 3, 1, 3, 1, 10, 1, 4, 1, optimizer='SGD')
+    logistic_regression(10, 3, 1, 3, 1, 10, 1, 4, 1, optimizer='NTM')
 
 
 if __name__ == '__main__':
