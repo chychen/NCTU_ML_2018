@@ -38,7 +38,7 @@ def is_33_singullar(mat):
     det = mat[0, 0]*mat[1, 1]*mat[2, 2]+mat[1, 0]*mat[2, 1]*mat[0, 2]+mat[0, 1]*mat[1, 2]*mat[2,
                                                                                               0] - mat[0, 2]*mat[1, 1]*mat[2, 0]+mat[0, 1]*mat[1, 0]*mat[2, 2]+mat[0, 0]*mat[2, 1]*mat[1, 2]
     print('Determinant: ', det)
-    return det==0
+    return det == 0
 
 
 def mean_abs_diff(a, b):
@@ -74,7 +74,7 @@ def steepest_gradient_descent(weights, inputs, labels, iterations=1e6, epsilon=1
     return weights
 
 
-def newton_method(weights, inputs, labels, iterations=1e6, epsilon=1e-5, learning_rate=1e-4):
+def newton_method(weights, inputs, labels, iterations=1e6, epsilon=1e-4, learning_rate=1e-3):
     """ newton's method
     to classify data into two classes (Bernoulli Distribution)
     (gradient in matrix form)
@@ -104,7 +104,13 @@ def newton_method(weights, inputs, labels, iterations=1e6, epsilon=1e-5, learnin
         if is_33_singullar(hessian):
             print('Singular')
             break
-        weights = old_weights - learning_rate*hessian.inv()*gradients
+        grad = learning_rate*hessian.inv()*gradients
+        for i in range(grad.shape[0]):
+            if grad[i, 0] > 0 and grad[i, 0] > 1:
+                grad[i, 0] = 1
+            if grad[i, 0] < 0 and grad[i, 0] < -1:
+                grad[i, 0] = -1
+        weights = old_weights - grad
         print(weights)
         if mean_abs_diff(old_weights, weights) < epsilon:
             break
@@ -176,7 +182,7 @@ def logistic_regression(n, mx1, vx1, my1, vy1, mx2, vx2, my2, vy2, optimizer='SG
 
 
 def main():
-    # logistic_regression(10, 3, 1, 3, 1, 10, 1, 4, 1, optimizer='SGD')
+    logistic_regression(10, 3, 1, 3, 1, 10, 1, 4, 1, optimizer='SGD')
     logistic_regression(10, 3, 1, 3, 1, 10, 1, 4, 1, optimizer='NTM')
 
 
