@@ -64,7 +64,7 @@ def steepest_gradient_descent(weights, inputs, labels, iterations=1e6, epsilon=1
         gradients = []
         for i in range(labels.shape[0]):
             exp_term = (-1*inputs[i:i+1]*old_weights)[0, 0]
-            gradients.append([labels[i, 0]-1.0/(1+math.e**exp_term)])
+            gradients.append([labels[i, 0]-1.0/(1+math.exp(exp_term))])
         gradients = learning_rate*inputs.t()*Mat(gradients)
         weights = old_weights + gradients
         print(weights)
@@ -93,23 +93,25 @@ def newton_method(weights, inputs, labels, iterations=1e6, epsilon=1e-4, learnin
         old_weights = Mat(weights)
         gradients = []
         for i in range(labels.shape[0]):
-            exp_term = (-1*inputs[i:i+1]*old_weights)[0, 0]
-            gradients.append([labels[i, 0]-1.0/(1+math.e**exp_term)])
+            exp_term = (-1*inputs[i:i+1]*weights)[0, 0]
+            gradients.append([labels[i, 0]-1.0/(1+math.exp(exp_term))])
         D = Mat.identity(dims=labels.shape[0])
         for i in range(labels.shape[0]):
-            exp_term = (-1*inputs[i:i+1]*old_weights)[0, 0]
-            D[i, i] = math.e**exp_term/((1+math.e**exp_term)**2)
+            exp_term = (-1*inputs[i:i+1]*weights)[0, 0]
+            D[i, i] = math.exp(exp_term)/((1+math.exp(exp_term))**2)
+            # D[i, i] = math.exp(exp_term-2*math.log(1+math.exp(exp_term)))
         gradients = inputs.t()*Mat(gradients)
         hessian = inputs.t()*D*inputs
         if is_33_singullar(hessian):
             print('Singular')
             break
         grad = learning_rate*hessian.inv()*gradients
-        for i in range(grad.shape[0]):
-            if grad[i, 0] > 0 and grad[i, 0] > 1:
-                grad[i, 0] = 1
-            if grad[i, 0] < 0 and grad[i, 0] < -1:
-                grad[i, 0] = -1
+        # clipping ?!
+        # for i in range(grad.shape[0]):
+        #     if grad[i, 0] > 0 and grad[i, 0] > 10:
+        #         grad[i, 0] = 10
+        #     if grad[i, 0] < 0 and grad[i, 0] < -10:
+        #         grad[i, 0] = -10
         weights = old_weights - grad
         print(weights)
         if mean_abs_diff(old_weights, weights) < epsilon:
@@ -121,8 +123,8 @@ def inference(weights, inputs):
     logits = []
     for i in range(inputs.shape[0]):
         exp_term = (-1*inputs[i:i+1]*weights)[0, 0]
-        output = 1.0/(1+math.e**exp_term)
-        print(output)
+        output = 1.0/(1+math.exp(exp_term))
+        # print(output)
         # decision boundary
         if output > 0.5:
             output = 1
@@ -160,7 +162,7 @@ def logistic_regression(n, mx1, vx1, my1, vy1, mx2, vx2, my2, vy2, optimizer='SG
     inputs = Mat(inputs)
     labels = Mat(labels)
     # init weights
-    weights = Mat([[1.0], [1.0], [1.0]])
+    weights = Mat([[-6.0], [1.0], [-0.1]])
     print('inputs shape:\t', inputs.shape)
     print('labels shape:\t', labels.shape)
     print('weights shape:\t', weights.shape)

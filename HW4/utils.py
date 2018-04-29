@@ -32,14 +32,14 @@ class ConfusionMatrix(object):
         for i in range(logits.shape[0]):
             if int(logits[i, 0]) == 0:
                 if int(labels[i, 0]) == 0:
-                    self.TP += 1
+                    self.TN += 1
                 elif int(labels[i, 0]) == 1:
-                    self.FP += 1
+                    self.FN += 1
             elif int(logits[i, 0]) == 1:
                 if int(labels[i, 0]) == 0:
-                    self.FN += 1
+                    self.FP += 1
                 elif int(labels[i, 0]) == 1:
-                    self.TN += 1
+                    self.TP += 1
 
     def show_matrix(self):
         print('Confusion Matrix')
