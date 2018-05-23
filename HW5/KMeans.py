@@ -17,7 +17,7 @@ def kmeans(data, kernel_fn, num_clusters, epsilon=1e-1):
     min_x = np.amin(data[:, 0])
     max_y = np.amax(data[:, 1])
     min_y = np.amin(data[:, 1])
-    # init center
+    # random init data classes
     cluster_center = np.array([max_x-min_x, max_y-min_y]) * \
         np.random.random((num_clusters, 2))+np.array([min_x, min_y])
     r_one_hot = np.zeros(shape=[data.shape[0], num_clusters])
@@ -34,12 +34,6 @@ def kmeans(data, kernel_fn, num_clusters, epsilon=1e-1):
     while True:
         iterator_counter += 1
         print(iterator_counter)
-        # show
-        plt.clf()
-        plt.ion()
-        plt.scatter(data[:, 0], data[:, 1], c=r_index, alpha=0.5)
-        plt.show(block=False)
-        plt.pause(0.01)
         old_center = copy.deepcopy(cluster_center)
         # E step
         # || fi(X_n) - MU_k ||
@@ -75,8 +69,16 @@ def kmeans(data, kernel_fn, num_clusters, epsilon=1e-1):
             cluster_center[k] = np.sum(
                 data * r_one_hot[:, k:k+1], axis=0) / num_cluster_table[k]
         print(cluster_center)
-
+        # show
+        plt.clf()
+        plt.ion()
+        plt.scatter(data[:, 0], data[:, 1], c=r_index, alpha=0.5)
+        plt.show(block=False)
+        plt.pause(0.01)
+        # terminal condition
         if all(length(cluster_center - old_center, axis=1) < epsilon):
+            print('STOP')
+            plt.show(block=True)
             break
 
 
@@ -86,22 +88,31 @@ def RBF_kernel(x1, x2, sigma=0.5):
 def sigmoid_kernel(x1, x2, gamma=1.0, r=1.0):
     return np.tanh(gamma*np.dot(x1, x2) +r)
 
-def no_kernel(x1, x2):
+def linear_kernel(x1, x2):
     return np.dot(x1, x2)
 
 
 def main():
     data = []
-    # with open("data/circle.txt") as f:
+    with open("data/circle.txt") as f:
+        for line in f.readlines():
+            data.append([float(line.strip().split(',')[0]),
+                         float(line.strip().split(',')[1])])
+    data = np.array(data)
+    print('data.shape', data.shape)
+    kmeans(data, kernel_fn=linear_kernel, num_clusters=4)
+    kmeans(data, kernel_fn=RBF_kernel, num_clusters=4)
+    kmeans(data, kernel_fn=sigmoid_kernel, num_clusters=2)
+
     with open("data/moon.txt") as f:
         for line in f.readlines():
             data.append([float(line.strip().split(',')[0]),
                          float(line.strip().split(',')[1])])
     data = np.array(data)
     print('data.shape', data.shape)
-    # kmeans(data, kernel_fn=no_kernel, num_clusters=2)
+    kmeans(data, kernel_fn=linear_kernel, num_clusters=2)
     kmeans(data, kernel_fn=RBF_kernel, num_clusters=2)
-    # kmeans(data, kernel_fn=sigmoid_kernel, num_clusters=2)
+    kmeans(data, kernel_fn=sigmoid_kernel, num_clusters=2)
 
 
 if __name__ == "__main__":
