@@ -66,7 +66,7 @@ def em_algorithm(train_images, train_labels, theta, lambda_, iterations=1e6, eps
     N = train_images.shape[0]
     image_size = train_images.shape[1] * train_images.shape[2]
 
-    for iter_idx in range(int(20)):
+    for iter_idx in range(int(3)):
         print('iteration index: ', iter_idx)
         old_theta = copy.deepcopy(theta)
         theta = Mat.zeros(shape=[10, image_size]) + 1e-8  # avoid zeros
@@ -165,7 +165,8 @@ def main():
                                                                   * train_images.shape[2])] for _ in range(10)])
     # init_theta = Mat([[0.5 for _ in range(train_images.shape[1]
     #                                       * train_images.shape[2])] for _ in range(10)])
-    init_lambda = [0.1 for _ in range(10)]
+    init_lambda = [0.05, 0.10, 0.15, 0.10, 0.05, 0.10, 0.15, 0.10, 0.10, 0.10]
+    # init_lambda = [0.1 for _ in range(10)]
     logits, group_labels = em_algorithm(train_images, train_labels, init_theta, init_lambda)
     prediction = []
     for i in range(logits.shape[0]):
