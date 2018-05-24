@@ -38,7 +38,7 @@ def precomputed_kernel():
             for line in f.readlines():
                 tmp = list(map(lambda x: float(x), line.strip().split(',')))
                 tmp_data.append(tmp)
-            data[file_name] = tmp_data[:10]
+            data[file_name] = tmp_data
     # label
     for file_name in ['T_train', 'T_test']:
         with open('data/'+file_name+'.csv') as f:
@@ -46,31 +46,48 @@ def precomputed_kernel():
             for line in f.readlines():
                 tmp = int(line)
                 tmp_data.append(tmp)
-            data[file_name] = tmp_data[:10]
+            data[file_name] = tmp_data
 
     def RBF_kernel(x1, x2, gamma):
-        return np.exp(-1.0*gamma*np.mean((x1-x2)**2, axis=0))
+        return np.exp(-1.0*gamma*np.sum((x1-x2)**2, axis=0))
 
     def linear_kernel(x1, x2):
         return np.dot(x1, x2)
 
     def new_kernel(x1, x2, gamma):
-        return RBF_kernel(np.array(x1), np.array(x2), gamma) + np.dot(np.array(x1), np.array(x2))
-    
+        return linear_kernel(x1, x2) + RBF_kernel(np.array(x1), np.array(x2), gamma)
+
+    m = svm_train(data['T_train'], data['X_train'], '-s 0 -t 0 -c 1')
+    p_label, p_acc, p_val = svm_predict(data['T_train'], data['X_train'], m)
+    p_label, p_acc, p_val = svm_predict(data['T_test'], data['X_test'], m)
+
     # after grid serach we found c=3.0 gamma=-5.0 can get highest 98.5%
+    # sparse
     gram_matrix = []
     for i, x1 in enumerate(data['X_train']):
         print(i)
-        tmp = [i]
-        for x2 in data['X_train']:
-            tmp.append(new_kernel(x1, x2, gamma=-5.0))
+        tmp = {}
+        tmp[0] = i+1
+        for j, x2 in enumerate(data['X_train']):
+            tmp[j+1] = new_kernel(x1, x2, gamma=1.0/28)
         gram_matrix.append(tmp)
+    test_gram_matrix = []
+    for i, x1 in enumerate(data['X_test']):
+        print(i)
+        tmp = {}
+        tmp[0] = i  # any number
+        for j, x2 in enumerate(data['X_train']):
+            tmp[j+1] = new_kernel(x1, x2, gamma=1.0/28)
+        test_gram_matrix.append(tmp)
 
     # train
-    prob = svm_problem(data['T_train'], gram_matrix, isKernel=True)
-    param = svm_parameter('-s 0 -t 4 -c 3')
+    prob = svm_problem(data['T_train'], gram_matrix)
+    param = svm_parameter('-s 0 -t 4 -c 1')
     model = svm_train(prob, param)
-    p_label, p_acc, p_val = svm_predict(data['T_test'], data['X_test'], model)
+    p_label, p_acc, p_val = svm_predict(
+        data['T_train'], gram_matrix, model)
+    p_label, p_acc, p_val = svm_predict(
+        data['T_test'], test_gram_matrix, model)
 
 
 def main():
