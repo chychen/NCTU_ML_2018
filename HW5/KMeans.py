@@ -78,7 +78,7 @@ def main():
                          float(line.strip().split(',')[1])])
     data = np.array(data)
     print('data.shape', data.shape)
-    kmeans(data, num_clusters=4)
+    kmeans(data, num_clusters=2)
 
     data = []
     with open("data/moon.txt") as f:
@@ -87,7 +87,7 @@ def main():
                          float(line.strip().split(',')[1])])
     data = np.array(data)
     print('data.shape', data.shape)
-    kmeans(data, num_clusters=4)
+    kmeans(data, num_clusters=2)
 
 
 if __name__ == "__main__":
