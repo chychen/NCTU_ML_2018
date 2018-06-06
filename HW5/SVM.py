@@ -12,6 +12,7 @@ from libsvm.tools.grid import *
 from svmutil import *
 from grid import *
 import numpy as np
+import os
 
 
 def test_kernel():
@@ -63,22 +64,30 @@ def precomputed_kernel():
 
     # after grid serach we found c=3.0 gamma=-5.0 can get highest 98.5%
     # sparse
-    gram_matrix = []
-    for i, x1 in enumerate(data['X_train']):
-        print(i)
-        tmp = {}
-        tmp[0] = i+1
-        for j, x2 in enumerate(data['X_train']):
-            tmp[j+1] = new_kernel(x1, x2, gamma=1.0/28)
-        gram_matrix.append(tmp)
-    test_gram_matrix = []
-    for i, x1 in enumerate(data['X_test']):
-        print(i)
-        tmp = {}
-        tmp[0] = i  # any number
-        for j, x2 in enumerate(data['X_train']):
-            tmp[j+1] = new_kernel(x1, x2, gamma=1.0/28)
-        test_gram_matrix.append(tmp)
+    if os.path.exists('data/gram_matrix_train.npy'):
+        gram_matrix = np.load('data/gram_matrix_train.npy')
+    else:
+        gram_matrix = []
+        for i, x1 in enumerate(data['X_train']):
+            print(i)
+            tmp = {}
+            tmp[0] = i+1
+            for j, x2 in enumerate(data['X_train']):
+                tmp[j+1] = new_kernel(x1, x2, gamma=1.0/28)
+            gram_matrix.append(tmp)
+        np.save('data/gram_matrix_train.npy', gram_matrix)
+    if os.path.exists('data/gram_matrix_test.npy'):
+        test_gram_matrix = np.load('data/gram_matrix_test.npy')
+    else:
+        test_gram_matrix = []
+        for i, x1 in enumerate(data['X_test']):
+            print(i)
+            tmp = {}
+            tmp[0] = i  # any number
+            for j, x2 in enumerate(data['X_train']):
+                tmp[j+1] = new_kernel(x1, x2, gamma=1.0/28)
+            test_gram_matrix.append(tmp)
+        np.save('data/gram_matrix_test.npy', test_gram_matrix)
 
     # train
     prob = svm_problem(data['T_train'], gram_matrix)
