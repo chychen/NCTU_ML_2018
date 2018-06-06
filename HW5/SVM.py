@@ -1,7 +1,7 @@
 """ 
 1. need to export the libsvm path to the env variables
 export PYTHONPATH="${PYTHONPATH}:/Users/Jay/Desktop/NCTU_ML_2018/HW5/libsvm/python"
-export PYTHONPATH="${PATH}:/Users/Jay/Desktop/NCTU_ML_2018/HW5/libsvm/tools"
+export PYTHONPATH="${PYTHONPATH}:/Users/Jay/Desktop/NCTU_ML_2018/HW5/libsvm/tools"
 """
 from __future__ import absolute_import
 from __future__ import print_function
@@ -61,6 +61,8 @@ def precomputed_kernel():
     m = svm_train(data['T_train'], data['X_train'], '-s 0 -t 0 -c 1')
     p_label, p_acc, p_val = svm_predict(data['T_train'], data['X_train'], m)
     p_label, p_acc, p_val = svm_predict(data['T_test'], data['X_test'], m)
+    support_vectors = m.get_SV()
+    print(len(support_vectors))
 
     # after grid serach we found c=3.0 gamma=-5.0 can get highest 98.5%
     # sparse
