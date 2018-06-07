@@ -85,22 +85,19 @@ def precomputed_kernel():
     m = svm_train(prob, param)
     # get support vector
     support_vectors = m.get_SV()
-    p_labels, p_accs, p_vals = svm_predict(
-        np.zeros(len(support_vectors)), support_vectors, m)
-    # sparse to dense
-    dense_sv = np.zeros(shape=[len(support_vectors), 28*28])
+    # get support vector index in data
+    indecis = np.zeros(shape=data['X_train'].shape[0], dtype=bool)
     for i, dict_ in enumerate(support_vectors):
-        for key in dict_.keys():
-            dense_sv[i, key] = dict_[key]
+        indecis[int(dict_[0])] = True
     # vis
-    pca_plot_with_svm(data['X_train'], data['T_train'], dense_sv, np.array(
-        p_labels), file_name='svm_pca_mode_precomputed')
+    pca_plot_with_svm(data['X_train'], data['T_train'], data['X_train'][indecis], data['T_train'][indecis], file_name='svm_pca_mode_precomputed')
 
 
 def main():
     # linear, polynomial, RBF
-    # for mode in range(3):
-    #     test_kernel(mode=mode)
+    for mode in range(3):
+        test_kernel(mode=mode)
+    # linear+RBF
     precomputed_kernel()
 
 
