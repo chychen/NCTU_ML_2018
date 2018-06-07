@@ -25,7 +25,10 @@ wheels/
 .installed.cfg
 *.egg
 
+# data
 *.videos/
+*.data/gram_matrix_test.npy
+*.data/gram_matrix_train.npy
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
