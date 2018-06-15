@@ -114,7 +114,7 @@ def pca(X=np.array([]), no_dims=50):
     return Y
 
 
-def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetric=False, labels=None):
+def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetric=False, labels=None, filename='', is_vis_by_iter=False):
     """
         Runs t-SNE on the dataset in the NxD array X to reduce its
         dimensionality to no_dims dimensions. The syntaxis of the function is
@@ -132,7 +132,7 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetr
     # Initialize variables
     X = pca(X, initial_dims).real
     (n, d) = X.shape
-    max_iter = 1000
+    max_iter = 200
     initial_momentum = 0.5
     final_momentum = 0.8
     eta = 500
@@ -144,6 +144,17 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetr
 
     # Compute P-values
     P = x2p(X, 1e-5, perplexity, is_symmetric=is_symmetric)
+    # plot similariry (re-ordered)
+    P_ordered = np.zeros_like(P)
+    acc_idx = 0
+    for i in range(10):  # 10 classes in label
+        indecies = labels == i
+        P_ordered[acc_idx:acc_idx+P[indecies].shape[0]] = P[indecies]
+        acc_idx += P[indecies].shape[0]
+    pylab.clf()
+    pylab.imshow(P_ordered, cmap='hot', interpolation='nearest')
+    pylab.savefig('{}_high_dim_similarity.png'.format(filename))
+
     P = P + np.transpose(P)
     P = P / np.sum(P)
     P = P * 4.									# early exaggeration
@@ -182,7 +193,7 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetr
         if (iter + 1) % 10 == 0:
             C = np.sum(P * np.log(P / Q))
             print("Iteration %d: error is %f" % (iter + 1, C))
-            if labels is not None:
+            if labels is not None and is_vis_by_iter:
                 pylab.clf()
                 pylab.ion()
                 pylab.scatter(Y[:, 0], Y[:, 1], 20, labels)
@@ -193,6 +204,16 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetr
         if iter == 100:
             P = P / 4.
 
+    # plot similariry (re-ordered)
+    Q_ordered = np.zeros_like(Q)
+    acc_idx = 0
+    for i in range(10):  # 10 classes in label
+        indecies = labels == i
+        Q_ordered[acc_idx:acc_idx+Q[indecies].shape[0]] = Q[indecies]
+        acc_idx += Q[indecies].shape[0]
+    pylab.clf()
+    pylab.imshow(Q_ordered, cmap='hot', interpolation='nearest')
+    pylab.savefig('{}_low_dim_similarity.png'.format(filename))
     # Return solution
     return Y
 
@@ -202,17 +223,18 @@ if __name__ == "__main__":
     print("Running example on 2,500 MNIST digits...")
     X = np.loadtxt("tsne_python/mnist2500_X.txt")
     labels = np.loadtxt("tsne_python/mnist2500_labels.txt")
-    Y = tsne(X, 2, 50, 20.0, is_symmetric=False)
     filename = 'tSNE'
+    Y = tsne(X, 2, 50, 20.0, is_symmetric=False,
+             filename=filename, labels=labels)
     pylab.clf()
     pylab.scatter(Y[:, 0], Y[:, 1], 20, labels)
     pylab.savefig('{}.png'.format(filename))
     print('save fig into filenme: {}.png'.format(filename))
 
-    Y = tsne(X, 2, 50, 20.0, is_symmetric=True)
     filename = 'symmetricSNE'
+    Y = tsne(X, 2, 50, 20.0, is_symmetric=True,
+             filename=filename, labels=labels)
     pylab.clf()
     pylab.scatter(Y[:, 0], Y[:, 1], 20, labels)
     pylab.savefig('{}.png'.format(filename))
     print('save fig into filenme: {}.png'.format(filename))
-
