@@ -145,12 +145,19 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetr
     # Compute P-values
     P = x2p(X, 1e-5, perplexity, is_symmetric=is_symmetric)
     # plot similariry (re-ordered)
+    P_ordered_row = np.zeros_like(P)
+    acc_idx = 0
+    for i in range(10):  # 10 classes in label
+        indecies = labels == i
+        P_ordered_row[acc_idx:acc_idx+P[indecies].shape[0]] = P[indecies]
+        acc_idx += P[indecies].shape[0]
     P_ordered = np.zeros_like(P)
     acc_idx = 0
     for i in range(10):  # 10 classes in label
         indecies = labels == i
-        P_ordered[acc_idx:acc_idx+P[indecies].shape[0]] = P[indecies]
-        acc_idx += P[indecies].shape[0]
+        P_ordered[:, acc_idx:acc_idx+P_ordered_row[indecies].shape[0]
+                  ] = P_ordered_row[:, indecies]
+        acc_idx += P_ordered_row[indecies].shape[0]
     pylab.clf()
     pylab.imshow(P_ordered, cmap='hot', interpolation='nearest')
     pylab.savefig('{}_high_dim_similarity.png'.format(filename))
@@ -205,12 +212,19 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetr
             P = P / 4.
 
     # plot similariry (re-ordered)
-    Q_ordered = np.zeros_like(Q)
+    Q_ordered_row = np.zeros_like(Q)
     acc_idx = 0
     for i in range(10):  # 10 classes in label
         indecies = labels == i
-        Q_ordered[acc_idx:acc_idx+Q[indecies].shape[0]] = Q[indecies]
+        Q_ordered_row[acc_idx:acc_idx+Q[indecies].shape[0]] = Q[indecies]
         acc_idx += Q[indecies].shape[0]
+    Q_ordered = np.zeros_like(P)
+    acc_idx = 0
+    for i in range(10):  # 10 classes in label
+        indecies = labels == i
+        Q_ordered[:, acc_idx:acc_idx+Q_ordered_row[indecies].shape[0]
+                  ] = Q_ordered_row[:, indecies]
+        acc_idx += Q_ordered_row[indecies].shape[0]
     pylab.clf()
     pylab.imshow(Q_ordered, cmap='hot', interpolation='nearest')
     pylab.savefig('{}_low_dim_similarity.png'.format(filename))
