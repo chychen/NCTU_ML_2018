@@ -30,7 +30,7 @@ def Hbeta(D=np.array([]), beta=1.0):
     return H, P
 
 
-def x2p(X=np.array([]), tol=1e-5, perplexity=30.0, is_symmetric=False):
+def x2p(X=np.array([]), tol=1e-5, perplexity=30.0):
     """
         Performs a binary search to get P-values in such a way that each
         conditional Gaussian has the same perplexity.
@@ -85,16 +85,6 @@ def x2p(X=np.array([]), tol=1e-5, perplexity=30.0, is_symmetric=False):
         # Set the final row of P
         P[i, np.concatenate((np.r_[0:i], np.r_[i+1:n]))] = thisP
 
-    # make is_symmetric
-    if is_symmetric:
-        print("Computing for symmetric mode ...")
-        tmp_P = np.zeros((n, n))
-        for i in range(P.shape[0]):
-            for j in range(P.shape[1]):
-                if i != j:
-                    tmp_P[i, j] = (P[i, j]+P[j, i])/2.0
-        P = tmp_P
-
     # Return final P-matrix
     print("Mean value of sigma: %f" % np.mean(np.sqrt(1 / beta)))
     return P
@@ -143,7 +133,7 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetr
     gains = np.ones((n, no_dims))
 
     # Compute P-values
-    P = x2p(X, 1e-5, perplexity, is_symmetric=is_symmetric)
+    P = x2p(X, 1e-5, perplexity)
     # plot similariry (re-ordered)
     P_ordered_row = np.zeros_like(P)
     acc_idx = 0
@@ -170,19 +160,37 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetr
     # Run iterations
     for iter in range(max_iter):
 
-        # Compute pairwise affinities
-        sum_Y = np.sum(np.square(Y), 1)
-        num = -2. * np.dot(Y, Y.T)
-        num = 1. / (1. + np.add(np.add(num, sum_Y).T, sum_Y))
-        num[range(n), range(n)] = 0.
-        Q = num / np.sum(num)
-        Q = np.maximum(Q, 1e-12)
-
-        # Compute gradient
-        PQ = P - Q
-        for i in range(n):
-            dY[i, :] = np.sum(np.tile(PQ[:, i] * num[:, i],
-                                      (no_dims, 1)).T * (Y[i, :] - Y), 0)
+        if is_symmetric:
+            # Computing symmetric SNE
+            # Compute pairwise affinities
+            sum_Y = np.sum(np.square(Y), 1)
+            num = -2. * np.dot(Y, Y.T)
+            # sexy way to implement (1/(yi-yj)**2)
+            num = -1 * np.add(np.add(num, sum_Y).T, sum_Y)
+            num = np.exp(num)
+            num[range(n), range(n)] = 0.
+            Q = num / np.sum(num)
+            Q = np.maximum(Q, 1e-12)
+            # Compute gradient
+            PQ = P - Q
+            for i in range(n):
+                dY[i, :] = np.sum(
+                    np.tile(PQ[:, i], (no_dims, 1)).T * (Y[i, :] - Y), 0)
+        else:
+            # Computing t SNE
+            # Compute pairwise affinities
+            sum_Y = np.sum(np.square(Y), 1)
+            num = -2. * np.dot(Y, Y.T)
+            # sexy way to implement (1/(yi-yj)**2)
+            num = 1. / (1. + np.add(np.add(num, sum_Y).T, sum_Y))
+            num[range(n), range(n)] = 0.
+            Q = num / np.sum(num)
+            Q = np.maximum(Q, 1e-12)
+            # Compute gradient
+            PQ = P - Q
+            for i in range(n):
+                dY[i, :] = np.sum(np.tile(PQ[:, i] * num[:, i],
+                                          (no_dims, 1)).T * (Y[i, :] - Y), 0)
 
         # Perform the update
         if iter < 20:
