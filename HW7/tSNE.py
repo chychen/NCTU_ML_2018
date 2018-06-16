@@ -14,6 +14,7 @@
 
 import numpy as np
 import pylab
+import os
 
 
 def Hbeta(D=np.array([]), beta=1.0):
@@ -104,7 +105,7 @@ def pca(X=np.array([]), no_dims=50):
     return Y
 
 
-def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetric=False, labels=None, filename='', is_vis_by_iter=False):
+def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetric_sne=False, labels=None, filename='', is_vis_by_iter=False):
     """
         Runs t-SNE on the dataset in the NxD array X to reduce its
         dimensionality to no_dims dimensions. The syntaxis of the function is
@@ -160,7 +161,7 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetr
     # Run iterations
     for iter in range(max_iter):
 
-        if is_symmetric:
+        if is_symmetric_sne:
             # Computing symmetric SNE
             # Compute pairwise affinities
             sum_Y = np.sum(np.square(Y), 1)
@@ -241,22 +242,36 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0, is_symmetr
 
 
 if __name__ == "__main__":
-    print("Run Y = tsne.tsne(X, no_dims, initial_dims, perplexity, is_symmetric) to perform t-SNE on your dataset.")
+    print("Run Y = tsne.tsne(X, no_dims, initial_dims, perplexity, is_symmetric_sne) to perform t-SNE on your dataset.")
     print("Running example on 2,500 MNIST digits...")
     X = np.loadtxt("tsne_python/mnist2500_X.txt")
     labels = np.loadtxt("tsne_python/mnist2500_labels.txt")
+    # tSNE
     filename = 'tSNE'
-    Y = tsne(X, 2, 50, 20.0, is_symmetric=False,
+    Y = tsne(X, 2, 50, 20.0, is_symmetric_sne=False,
              filename=filename, labels=labels)
     pylab.clf()
     pylab.scatter(Y[:, 0], Y[:, 1], 20, labels)
     pylab.savefig('{}.png'.format(filename))
     print('save fig into filenme: {}.png'.format(filename))
-
+    # symmetricSNE
     filename = 'symmetricSNE'
-    Y = tsne(X, 2, 50, 20.0, is_symmetric=True,
+    Y = tsne(X, 2, 50, 20.0, is_symmetric_sne=True,
              filename=filename, labels=labels)
     pylab.clf()
     pylab.scatter(Y[:, 0], Y[:, 1], 20, labels)
     pylab.savefig('{}.png'.format(filename))
     print('save fig into filenme: {}.png'.format(filename))
+    # try tSNE with diff perplexity
+    if not os.path.exists('cmp_perplexity'):
+        os.mkdir('cmp_perplexity')
+    for perp in range(5, 55, 5):
+        filename = 'cmp_perplexity/tSNE_perplexity{}'.format(perp)
+        Y = tsne(X, 2, 50, perp, is_symmetric_sne=False,
+                filename=filename, labels=labels)
+        pylab.clf()
+        pylab.scatter(Y[:, 0], Y[:, 1], 20, labels)
+        pylab.savefig('{}.png'.format(filename))
+        print('save fig into filenme: {}.png'.format(filename))
+
+
