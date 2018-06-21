@@ -46,7 +46,7 @@ def ratio_cut_laplacian(affinity_mat):
     """
     D_mat = np.zeros(affinity_mat.shape)
     d_trace = np.sum(affinity_mat, axis=0)
-    D_mat.flat[::D_mat.shape[0]+1] = d_trace**(-0.5)
+    D_mat.flat[::D_mat.shape[0]+1] = d_trace
     return D_mat - affinity_mat
 
 
