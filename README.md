@@ -1,1 +1,23 @@
 # NCTU_ML_2018
+- [HW1](https://github.com/chychen/NCTU_ML_2018/tree/master/HW1)
+  - regularized Least Square Error (rLSE)
+  - Newton's Method
+- [HW2](https://github.com/chychen/NCTU_ML_2018/tree/master/HW2)
+  - Naive Bayes
+  - Online Learning
+- [HW3](https://github.com/chychen/NCTU_ML_2018/tree/master/HW3)
+  - Baysian Linear Regression
+  - Sequential Estimation
+- [HW4](https://github.com/chychen/NCTU_ML_2018/tree/master/HW4)
+  - Logistic Regression
+  - EM Algorithm
+- [HW5](https://github.com/chychen/NCTU_ML_2018/tree/master/HW5)
+  - KMeans
+  - Kernel Kmeans
+  - Support Vector Machine(SVM)
+- [HW6](https://github.com/chychen/NCTU_ML_2018/tree/master/HW6)
+  - Linear Discriminant Analysis (LDA)
+  - Principal Component Analysis (PCA)
+  - Spectral Clustering
+- [HW7](https://github.com/chychen/NCTU_ML_2018/tree/master/HW7)
+  - t-Distributed Stochastic Neighbor Embedding (tSNE)
